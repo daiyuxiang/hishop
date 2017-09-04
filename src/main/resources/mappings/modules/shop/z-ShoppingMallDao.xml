@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.ShoppingMallDao">
+    
+	
+	
+	<select id="checkMaxNum" resultType="Integer">
+		SELECT count(*)
+		FROM ts_shopping_mall a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>	
+			<if test="pageTop != null and pageTop != '' and pageTop != 0">
+				AND a.page_top = #{pageTop}
+			</if>
+			<if test="areaTop != null and areaTop != '' and areaTop != 0">
+				AND a.area_top = #{areaTop}
+			</if>
+			<if test="scrollTop != null and scrollTop != '' and scrollTop != 0">
+				AND a.scroll_top = #{scrollTop}
+			</if>	
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+	</select>
+	
+	
+	
+</mapper>

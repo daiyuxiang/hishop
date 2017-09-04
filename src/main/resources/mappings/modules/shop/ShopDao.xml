@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.ShopDao">
+    
+	<sql id="shopColumns">
+		a.id AS "id",
+		a.shop_no AS "shopNo",
+		a.open_id AS "openId",
+		a.nick_name AS "nickName",
+		a.mobile AS "mobile",
+		a.shop_name AS "shopName",
+		a.shop_address AS "shopAddress",
+		a.shop_type AS "shopType",
+		a.fee AS "fee",
+		a.transfer_fee AS "transferFee",
+		a.gold_flag AS "goldFlag",
+		a.gold_application_flag AS "goldApplicationFlag",
+		a.show_flag AS "showFlag",
+		a.province AS "province",
+		a.city AS "city",
+		a.area_id AS "area.id",
+		a.town_id AS "town.id",
+		a.shopping_mall AS "shoppingMall",
+		a.management_status AS "managementStatus",
+		a.operating_life AS "operatingLife",
+		a.brand_info AS "brandInfo",
+		a.current_management AS "currentManagement",
+		a.street AS "street",
+		a.position AS "position",
+		a.covered_area AS "coveredArea",
+		a.use_area AS "useArea",
+		a.depth AS "depth",
+		a.floor_height AS "floorHeight",
+		a.segmentation AS "segmentation",
+		a.payment_method AS "paymentMethod",
+		a.deposit AS "deposit",
+		a.maximum_lease AS "maximumLease",
+		a.lease_status AS "leaseStatus",
+		a.face_width AS "faceWidth",
+		a.floor AS "floor",
+		a.management_format AS "managementFormat",
+		a.image_1 AS "image1",
+		a.image_2 AS "image2",
+		a.image_3 AS "image3",
+		a.image_4 AS "image4",
+		a.image_5 AS "image5",
+		a.image_6 AS "image6",
+		a.publish_type AS "publishType",
+		a.sell_type AS "sellType",
+		a.shop_content AS "shopContent",
+		a.referrer AS "referrer",
+		a.member_name AS "memberName",
+		a.pass_date AS "passDate",
+		a.gold_date AS "goldDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a14.name AS "area.name",
+		a15.name AS "town.name"
+	</sql>
+	
+	<sql id="shopJoins">
+		LEFT JOIN sys_area a14 ON a14.id = a.area_id	
+		LEFT JOIN sys_area a15 ON a15.id = a.town_id	
+	</sql>
+    
+	<select id="get" resultType="Shop">
+		SELECT 
+			<include refid="shopColumns"/>
+		FROM ts_shop a
+		<include refid="shopJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Shop">
+		SELECT 
+			<include refid="shopColumns"/>
+		FROM ts_shop a
+		<include refid="shopJoins"/>
+		<if test="hotString != null and hotString != ''">
+			,(
+				SELECT DISTINCT
+					(shop_id)
+				FROM
+					ts_hot
+				WHERE
+					hot_value in 
+				<foreach collection="hotArray" index="index" item="item" open="(" separator="," close=")">
+	               #{item}       
+	        	</foreach> 
+			) b 
+		</if>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="hotString != null and hotString != ''">
+				and b.shop_id = a.id
+			</if>
+			<if test="shopName != null and shopName != ''">
+				AND a.shop_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{shopName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{shopName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{shopName},'%')</if>
+			</if>
+			<if test="shopType != null and shopType != ''">
+				AND a.shop_type = #{shopType}
+			</if>
+			<if test="goldApplicationFlag != null and goldApplicationFlag != ''">
+				AND a.gold_application_flag = #{goldApplicationFlag}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="town != null and town.id != null and town.id != ''">
+				AND a.town_id = #{town.id}
+			</if>
+			<if test="shoppingMall != null and shoppingMall != ''">
+				AND a.shopping_mall = #{shoppingMall}
+			</if>
+			<if test="managementStatus != null and managementStatus != ''">
+				AND a.management_status = #{managementStatus}
+			</if>
+			<if test="showFlag != null and showFlag != ''">
+				AND a.show_flag = #{showFlag}
+			</if>
+			<if test="publishType != null and publishType != ''">
+				AND a.publish_type = #{publishType}
+			</if>
+			<if test="goldFlag != null and goldFlag != ''">
+				AND a.gold_flag = #{goldFlag}
+			</if>
+			<if test="goldApplicationFlag != null and goldApplicationFlag != ''">
+				AND a.gold_application_flag = #{goldApplicationFlag}
+			</if>
+			<if test="todayFlag != null and todayFlag != ''">
+				AND date_format(a.create_date,'%Y-%m-%d') = CURDATE()
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="feeBegin != null and feeBegin != ''">
+				<![CDATA[ AND a.fee >= #{feeBegin} ]]>     
+			</if>
+			<if test="feeEnd != null and feeEnd != ''">
+				<![CDATA[ AND a.fee <= #{feeEnd} ]]>     
+			</if>
+			<if test="transferFeeBegin != null and transferFeeBegin != '' and transferFeeBegin != '1'.toString()  ">
+				<![CDATA[ AND a.transfer_fee >= #{transferFeeBegin} ]]>     
+			</if>
+			<if test="transferFeeBegin == '1'.toString()   ">
+				<![CDATA[ AND a.transfer_fee  is null]]>     
+			</if>
+			<if test="transferFeeEnd != null and transferFeeEnd != ''" >
+				<![CDATA[ AND a.transfer_fee <= #{transferFeeEnd} ]]>     
+			</if>
+			<if test="useAreaBegin != null and useAreaBegin != ''">
+				<![CDATA[ AND a.use_area >= #{useAreaBegin} ]]>     
+			</if>
+			<if test="useAreaEnd != null and useAreaEnd != ''">
+				<![CDATA[ AND a.use_area <= #{useAreaEnd} ]]>     
+			</if>
+			<if test="createDateBegin != null and createDateBegin != ''">
+				<![CDATA[ AND DATE_FORMAT(a.create_date,'%Y-%m-%d') >= DATE_FORMAT(#{createDateBegin},'%Y-%m-%d') ]]>   				  
+			</if>
+			<if test="createDateEnd != null and createDateEnd != ''">
+				<![CDATA[ AND DATE_FORMAT(a.create_date,'%Y-%m-%d') <= DATE_FORMAT(#{createDateEnd},'%Y-%m-%d') ]]>   				  			
+			</if>
+			<if test="passDateBegin != null and passDateBegin != ''">
+				<![CDATA[ AND DATE_FORMAT(a.pass_date,'%Y-%m-%d') >= DATE_FORMAT(#{passDateBegin},'%Y-%m-%d') ]]>   				  
+			</if>
+			<if test="passDateEnd != null and passDateEnd != ''">
+				<![CDATA[ AND DATE_FORMAT(a.pass_date,'%Y-%m-%d') <= DATE_FORMAT(#{passDateEnd},'%Y-%m-%d') ]]>   				  			
+			</if>
+			<if test="shopTypeString != null and shopTypeString != ''">
+				AND a.shop_type in
+				<foreach collection="shopTypeArray" index="index" item="item" open="(" separator="," close=")">
+	               #{item}       
+	        	</foreach> 
+			</if>	
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Shop">
+		SELECT 
+			<include refid="shopColumns"/>
+		FROM ts_shop a
+		<include refid="shopJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ts_shop(
+			id,
+			shop_no,
+			open_id,
+			nick_name,
+			mobile,
+			shop_name,
+			shop_address,
+			shop_type,
+			fee,
+			transfer_fee,
+			gold_flag,
+			gold_application_flag,
+			show_flag,
+			province,
+			city,
+			area_id,
+			town_id,
+			shopping_mall,
+			management_status,
+			operating_life,
+			brand_info,
+			current_management,
+			street,
+			position,
+			covered_area,
+			use_area,
+			depth,
+			floor_height,
+			segmentation,
+			payment_method,
+			deposit,
+			maximum_lease,
+			lease_status,
+			face_width,
+			floor,
+			management_format,
+			image_1,
+			image_2,
+			image_3,
+			image_4,
+			image_5,
+			image_6,
+			publish_type,
+			sell_type,
+			shop_content,
+			referrer,
+			member_name,
+			pass_date,
+			gold_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{shopNo},
+			#{openId},
+			#{nickName},
+			#{mobile},
+			#{shopName},
+			#{shopAddress},
+			#{shopType},
+			#{fee},
+			#{transferFee},
+			#{goldFlag},
+			#{goldApplicationFlag},
+			#{showFlag},
+			#{province},
+			#{city},
+			#{area.id}, 
+			#{town.id},
+			#{shoppingMall},
+			#{managementStatus},
+			#{operatingLife},
+			#{brandInfo},
+			#{currentManagement},
+			#{street},
+			#{position},
+			#{coveredArea},
+			#{useArea},
+			#{depth},
+			#{floorHeight},
+			#{segmentation},
+			#{paymentMethod},
+			#{deposit},
+			#{maximumLease},
+			#{leaseStatus},
+			#{faceWidth},
+			#{floor},
+			#{managementFormat},
+			#{image1},
+			#{image2},
+			#{image3},
+			#{image4},
+			#{image5},
+			#{image6},
+			#{publishType},
+			#{sellType},
+			#{shopContent},
+			#{referrer},
+			#{memberName},
+			#{passDate},
+			#{goldDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ts_shop SET 	
+			shop_no = #{shopNo},
+			open_id = #{openId},
+			nick_name = #{nickName},
+			mobile = #{mobile},
+			shop_name = #{shopName},
+			shop_address = #{shopAddress},
+			shop_type = #{shopType},
+			fee = #{fee},
+			transfer_fee = #{transferFee},
+			gold_flag = #{goldFlag},
+			gold_application_flag = #{goldApplicationFlag},
+			show_flag = #{showFlag},
+			province = #{province},
+			city = #{city},
+			area_id = #{area.id}, 
+			town_id = #{town.id}, 
+			shopping_mall = #{shoppingMall},
+			management_status = #{managementStatus},
+			operating_life = #{operatingLife},
+			brand_info = #{brandInfo},
+			current_management = #{currentManagement},
+			street = #{street},
+			position = #{position},
+			covered_area = #{coveredArea},
+			use_area = #{useArea},
+			depth = #{depth},
+			floor_height = #{floorHeight},
+			floor = #{floor},
+			segmentation = #{segmentation},
+			payment_method = #{paymentMethod},
+			deposit = #{deposit},
+			maximum_lease = #{maximumLease},
+			lease_status = #{leaseStatus},
+			face_width = #{faceWidth},
+			management_format = #{managementFormat},
+			image_1 = #{image1},
+			image_2 = #{image2},
+			image_3 = #{image3},
+			image_4 = #{image4},
+			image_5 = #{image5},
+			image_6 = #{image6},
+			publish_type = #{publishType},
+			sell_type = #{sellType},
+			shop_content = #{shopContent},
+			referrer = #{referrer},
+			member_name = #{memberName},
+			pass_date = #{passDate},
+			gold_date = #{goldDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ts_shop SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	
+</mapper>

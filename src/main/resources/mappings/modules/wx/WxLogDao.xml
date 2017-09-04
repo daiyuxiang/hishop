@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.wx.dao.WxLogDao">
+    
+	<sql id="wxLogColumns">
+		a.id AS "id",
+		a.interface_name AS "interfaceName",
+		a.interface_method AS "interfaceMethod",
+		a.red_money AS "redMoney",
+		a.code AS "code",
+		a.result AS "result",
+		a.open_id AS "openId",
+		a.create_time AS "createTime",
+		a.update_time AS "updateTime"
+	</sql>
+	
+	<sql id="wxLogJoins">
+	</sql>
+    
+	<select id="get" resultType="WxLog">
+		SELECT 
+			<include refid="wxLogColumns"/>
+		FROM ta_wx_log a
+		<include refid="wxLogJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WxLog">
+		SELECT 
+			<include refid="wxLogColumns"/>
+		FROM ta_wx_log a
+		<include refid="wxLogJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WxLog">
+		SELECT 
+			<include refid="wxLogColumns"/>
+		FROM ta_wx_log a
+		<include refid="wxLogJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ta_wx_log(
+			id,
+			interface_name,
+			interface_method,
+			red_money,
+			code,
+			result,
+			open_id,
+			create_time,
+			update_time
+		) VALUES (
+			#{id},
+			#{interfaceName},
+			#{interfaceMethod},
+			#{redMoney},
+			#{code},
+			#{result},
+			#{openId},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ta_wx_log SET 	
+			interface_name = #{interfaceName},
+			interface_method = #{interfaceMethod},
+			red_money = #{redMoney},
+			code = #{code},
+			result = #{result},
+			open_id = #{openId},
+			create_time = #{createTime},
+			update_time = #{updateTime}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ta_wx_log
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

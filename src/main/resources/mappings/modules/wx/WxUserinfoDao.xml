@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.wx.dao.WxUserinfoDao">
+    
+	<sql id="wxUserinfoColumns">
+		a.id AS "id",
+		a.openid AS "openid",
+		a.nickname AS "nickname",
+		a.sex AS "sex",
+		a.headimgurl AS "headimgurl",
+		a.country AS "country",
+		a.province AS "province",
+		a.city AS "city",
+		a.subscribe_time AS "subscribeTime",
+		a.subscribe AS "subscribe",
+		a.create_time AS "createTime",
+		a.update_time AS "updateTime",
+		a.invite_user_id AS "inviteUserId",
+		a.user_id AS "userId"
+	</sql>
+	
+	<sql id="wxUserinfoJoins">
+		LEFT JOIN ts_member u14 ON u14.open_id = a.openid
+	</sql>
+    
+	<select id="get" resultType="WxUserinfo">
+		SELECT 
+			<include refid="wxUserinfoColumns"/>
+		FROM ta_wx_userinfo a
+		<include refid="wxUserinfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WxUserinfo">
+		SELECT 
+			<include refid="wxUserinfoColumns"/>
+		FROM ta_wx_userinfo a
+		<include refid="wxUserinfoJoins"/>
+		<where>
+			<if test="openid != null and openid != ''">
+				AND a.openid = #{openid}
+			</if>
+			<if test="nickname != null and nickname != ''">
+				AND a.nickname LIKE 
+					<if test="dbName == 'oracle'">'%'||#{nickname}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{nickname}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{nickname},'%')</if>
+			</if>
+			<if test="sex != null and sex != ''">
+				AND a.sex = #{sex}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WxUserinfo">
+		SELECT 
+			<include refid="wxUserinfoColumns"/>
+		FROM ta_wx_userinfo a
+		<include refid="wxUserinfoJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ta_wx_userinfo(
+			id,
+			openid,
+			nickname,
+			sex,
+			headimgurl,
+			country,
+			province,
+			city,
+			subscribe_time,
+			subscribe,
+			create_time,
+			update_time,
+			invite_user_id,
+			user_id
+		) VALUES (
+			#{id},
+			#{openid},
+			#{nickname},
+			#{sex},
+			#{headimgurl},
+			#{country},
+			#{province},
+			#{city},
+			#{subscribeTime},
+			#{subscribe},
+			now(),
+			#{updateTime},
+			#{inviteUserId},
+			#{userId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ta_wx_userinfo SET 	
+			openid = #{openid},
+			nickname = #{nickname},
+			sex = #{sex},
+			headimgurl = #{headimgurl},
+			country = #{country},
+			province = #{province},
+			city = #{city},
+			subscribe_time = #{subscribeTime},
+			subscribe = #{subscribe},
+			create_time = #{createTime},
+			update_time = #{updateTime},
+			invite_user_id = #{inviteUserId},
+			user_id = #{userId}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ta_wx_userinfo
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

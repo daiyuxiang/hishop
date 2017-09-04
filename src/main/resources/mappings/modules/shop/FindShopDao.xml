@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.FindShopDao">
+    
+	<sql id="findShopColumns">
+		a.id AS "id",
+		a.purpose AS "purpose",
+		a.province AS "province",
+		a.city AS "city",
+		a.area_id AS "areaId",
+		a.town_id AS "town.id",
+		a.covered_area AS "coveredArea",
+		a.fee AS "fee",
+		a.shop_type AS "shopType",
+		a.management_format AS "managementFormat",
+		a.referrer AS "referrer",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.open_id AS "openId",
+		a.nick_name AS "nickName",
+		a.mobile AS "mobile",
+		a14.name AS "areaName"
+	</sql>
+	
+	<sql id="findShopJoins">
+		LEFT JOIN sys_area a14 ON a14.id = a.area_id
+	</sql>
+    
+	<select id="get" resultType="FindShop">
+		SELECT 
+			<include refid="findShopColumns"/>
+		FROM ts_find_shop a
+		<include refid="findShopJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="FindShop">
+		SELECT 
+			<include refid="findShopColumns"/>
+		FROM ts_find_shop a
+		<include refid="findShopJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="openId != null and openId != ''">
+				and a.open_id = #{openId}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				and a.mobile = #{mobile}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="FindShop">
+		SELECT 
+			<include refid="findShopColumns"/>
+		FROM ts_find_shop a
+		<include refid="findShopJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ts_find_shop(
+			id,
+			purpose,
+			province,
+			city,
+			area_id,
+			town_id,
+			covered_area,
+			fee,
+			shop_type,
+			management_format,
+			referrer,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			open_id,
+			nick_name,
+			mobile
+		) VALUES (
+			#{id},
+			#{purpose},
+			#{province},
+			#{city},
+			#{areaId},
+			#{town.id},
+			#{coveredArea},
+			#{fee},
+			#{shopType},
+			#{managementFormat},
+			#{referrer},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{openId},
+			#{nickName},
+			#{mobile}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ts_find_shop SET 	
+			purpose = #{purpose},
+			province = #{province},
+			city = #{city},
+			area_id = #{areaId},
+			town_id = #{town.id}, 
+			covered_area = #{coveredArea},
+			fee = #{fee},
+			shop_type = #{shopType},
+			management_format = #{managementFormat},
+			referrer = #{referrer},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			open_id = #{openId},
+			nick_name = #{nickName},
+			mobile = #{mobile}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ts_find_shop SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

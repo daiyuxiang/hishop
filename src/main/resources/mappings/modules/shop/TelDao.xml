@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.TelDao">
+    
+	<sql id="telColumns">
+		a.id AS "id",
+		a.call_time AS "callTime",
+		a.talk_time AS "talkTime",
+		a.call_date AS "callDate",
+		a.caller AS "caller",
+		a.callee AS "callee",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="telJoins">
+	</sql>
+    
+	<select id="get" resultType="Tel">
+		SELECT 
+			<include refid="telColumns"/>
+		FROM ts_tel a
+		<include refid="telJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Tel">
+		SELECT 
+			<include refid="telColumns"/>
+		FROM ts_tel a
+		<include refid="telJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="callTimeBegin != null and callTimeBegin != ''">
+				<![CDATA[ AND a.call_time >= #{callTimeBegin} ]]>     
+			</if>
+			<if test="callTimeEnd != null and callTimeEnd != ''">
+				<![CDATA[ AND a.call_time <= #{callTimeEnd} ]]>     
+			</if>
+			<if test="caller != null and caller != ''">
+				AND a.caller LIKE 
+					<if test="dbName == 'oracle'">'%'||#{caller}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{caller}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{caller},'%')</if>
+			</if>
+			<if test="callee != null and callee != ''">
+				AND a.callee LIKE 
+					<if test="dbName == 'oracle'">'%'||#{callee}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{callee}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{callee},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Tel">
+		SELECT 
+			<include refid="telColumns"/>
+		FROM ts_tel a
+		<include refid="telJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ts_tel(
+			id,
+			call_time,
+			talk_time,
+			call_date,
+			caller,
+			callee,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{callTime},
+			#{talkTime},
+			#{callDate},
+			#{caller},
+			#{callee},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ts_tel SET 	
+			call_time = #{callTime},
+			talk_time = #{talkTime},
+			call_date = #{callDate},
+			caller = #{caller},
+			callee = #{callee},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ts_tel SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

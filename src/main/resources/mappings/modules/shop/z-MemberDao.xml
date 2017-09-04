@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.MemberDao">
+    
+    <sql id="shopMemberColumns">
+    	m.id AS "id",
+		m.open_id AS "openId",
+		m.nick_name AS "nickName",
+		m.mobile AS "mobile",
+		m.sale_flag AS "saleFlag",
+		m.publish_sale_flag AS "publishSaleFlag",
+		m.shop_id AS "shopId",
+		m.shop_date AS "shopDate",
+		s.referrer AS "referrer"
+	</sql>
+	
+	<sql id="findMemberColumns">
+    	m.id AS "id",
+		m.open_id AS "openId",
+		m.nick_name AS "nickName",
+		m.mobile AS "mobile",
+		m.find_flag AS "findFlag",
+		m.publish_find_flag AS "publishFindFlag",
+		m.find_id AS "findId",
+		m.find_date AS "findDate",
+		s.referrer AS "referrer"
+	</sql>
+	
+	<sql id="visitorColumns">
+    	m.id AS "id",
+		m.nick_name AS "nickName",
+		m.last_date AS "lastDate"
+	</sql>
+	
+    
+	<sql id="goldMemberColumns">
+		m.mobile AS "mobile",
+		m.open_id AS "openId",
+		m.nick_name AS "nickName",
+		s.pass_date AS "passDate",
+		s.gold_date AS "goldDate",
+		s.shop_name AS "shopName",
+		s.show_flag AS "showFlag",
+		s.id AS "shopId",
+		s.referrer AS "referrer"
+	</sql>
+	
+	<select id="findGoldMemberList" resultType="Member">
+		SELECT 
+			<include refid="goldMemberColumns"/>
+			FROM
+				ts_shop s,
+				ts_member m
+		<where>
+				s.del_flag = '0'
+			AND s.gold_flag = '1'
+			AND s.id = m.shop_id
+			<if test="mobile != null and mobile != ''">
+				AND m.mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobile},'%')</if>
+			</if>
+			<if test="nickName != null and nickName != ''">
+				AND m.nick_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{nickName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{nickName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{nickName},'%')</if>
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND s.area_id = #{area.id}
+			</if>
+			<if test="shopType != null and shopType != ''">
+				AND s.shop_type = #{shopType}
+			</if>
+			<if test="showFlag != null and showFlag != ''">
+				AND s.show_flag = #{showFlag}
+			</if>
+			<if test="goldDateBegin != null and goldDateBegin != ''">
+				<![CDATA[ AND DATE_FORMAT(s.gold_date,'%Y-%m-%d') >= DATE_FORMAT(#{goldDateBegin},'%Y-%m-%d') ]]>   				  
+			</if>
+			<if test="goldDateEnd != null and goldDateEnd != ''">
+				<![CDATA[ AND DATE_FORMAT(s.gold_date,'%Y-%m-%d') <= DATE_FORMAT(#{goldDateEnd},'%Y-%m-%d') ]]>   				  
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY s.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findShopList" resultType="Member">
+		SELECT 
+			<include refid="shopMemberColumns"/>
+			FROM
+				ts_shop s,
+				ts_member m
+		<where>
+				s.del_flag = '0'
+			AND s.id = m.shop_id
+			<if test="mobile != null and mobile != ''">
+				AND m.mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobile},'%')</if>
+			</if>
+			<if test="nickName != null and nickName != ''">
+				AND m.nick_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{nickName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{nickName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{nickName},'%')</if>
+			</if>
+			<if test="referrer != null and referrer != ''">
+				AND s.referrer LIKE 
+					<if test="dbName == 'oracle'">'%'||#{referrer}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{referrer}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{referrer},'%')</if>
+			</if>
+			<if test="shopDateBegin != null and shopDateBegin != ''">
+				<![CDATA[ AND DATE_FORMAT(m.shop_date,'%Y-%m-%d') >= DATE_FORMAT(#{shopDateBegin},'%Y-%m-%d') ]]>   				  
+			</if>
+			<if test="shopDateEnd != null and shopDateEnd != ''">
+				<![CDATA[ AND DATE_FORMAT(m.shop_date,'%Y-%m-%d') <= DATE_FORMAT(#{shopDateEnd},'%Y-%m-%d') ]]>   				  			
+			</if>
+			<if test="saleType != null and saleType != ''">
+				AND (m.sale_flag = #{saleType} OR m.publish_sale_flag = #{saleType})
+			</if>
+			<if test="saleMember != null and saleMember != '' and saleMember == 1">
+				AND m.sale_flag != '0'
+			</if>
+			<if test="saleMember != null and saleMember != '' and saleMember == 2">
+				AND m.publish_sale_flag != '0'
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY m.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findFindList" resultType="Member">
+		SELECT 
+			<include refid="findMemberColumns"/>
+			FROM
+				ts_find_shop s,
+				ts_member m
+		<where>
+				s.del_flag = '0'
+			AND s.id = m.find_id
+			<if test="mobile != null and mobile != ''">
+				AND m.mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobile},'%')</if>
+			</if>
+			<if test="nickName != null and nickName != ''">
+				AND m.nick_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{nickName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{nickName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{nickName},'%')</if>
+			</if>
+			<if test="referrer != null and referrer != ''">
+				AND s.referrer LIKE 
+					<if test="dbName == 'oracle'">'%'||#{referrer}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{referrer}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{referrer},'%')</if>
+			</if>
+			<if test="findDateBegin != null and findDateBegin != ''">
+				<![CDATA[ AND DATE_FORMAT(m.find_date,'%Y-%m-%d') >= DATE_FORMAT(#{findDateBegin},'%Y-%m-%d') ]]>   				  
+			</if>
+			<if test="findDateEnd != null and findDateEnd != ''">
+				<![CDATA[ AND DATE_FORMAT(m.find_date,'%Y-%m-%d') <= DATE_FORMAT(#{findDateEnd},'%Y-%m-%d') ]]>   				  			
+			</if>
+			<if test="findType != null and findType != ''">
+				AND (m.find_flag = #{findType} OR m.publish_find_flag = #{findType})
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY m.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findVisitorList" resultType="Member">
+		SELECT 
+			<include refid="visitorColumns"/>
+			FROM
+				ts_member m
+		<where>
+				m.mobile is null
+			<if test="openId != null and openId != ''">
+				AND m.open_id = #{openId}
+			</if>
+			<if test="nickName != null and nickName != ''">
+				AND m.nick_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{nickName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{nickName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{nickName},'%')</if>
+			</if>
+			<if test="lastDateBegin != null and lastDateBegin != ''">
+				<![CDATA[ AND DATE_FORMAT(m.last_date,'%Y-%m-%d') >= DATE_FORMAT(#{lastDateBegin},'%Y-%m-%d') ]]>   				  			
+			</if>
+			<if test="lastDateEnd != null and lastDateEnd != ''">
+				<![CDATA[ AND DATE_FORMAT(m.last_date,'%Y-%m-%d') <= DATE_FORMAT(#{lastDateBegin},'%Y-%m-%d') ]]>   				  			
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY m.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<delete id="deleteById">
+		DELETE FROM ts_member WHERE id = #{id}
+	</delete>
+	
+</mapper>

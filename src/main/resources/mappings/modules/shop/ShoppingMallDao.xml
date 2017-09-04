@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.ShoppingMallDao">
+    
+	<sql id="shoppingMallColumns">
+		a.id AS "id",
+		a.mall_name AS "mallName",
+		a.province AS "province",
+		a.city AS "city",
+		a.area_id AS "area.id",
+		a.town_id AS "town.id",
+		a.mall_url AS "mallUrl",
+		a.page_top AS "pageTop",
+		a.area_top AS "areaTop",
+		a.scroll_top AS "scrollTop",
+		a.shopping_area AS "shoppingArea",
+		a.dynamic_flow AS "dynamicFlow",
+		a.static_flow AS "staticFlow",
+		a.office_area AS "officeArea",
+		a.percent_1 AS "percent1",
+		a.percent_2 AS "percent2",
+		a.percent_3 AS "percent3",
+		a.percent_4 AS "percent4",
+		a.shop_num AS "shopNum",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a3.name AS "provinceName",
+		a4.name AS "cityName",
+		a5.name AS "area.name",
+		a6.name AS "town.name"
+	</sql>
+	
+	<sql id="shoppingMallJoins">
+		LEFT JOIN sys_area a3 ON a3.id = a.province
+		LEFT JOIN sys_area a4 ON a4.id = a.city
+		LEFT JOIN sys_area a5 ON a5.id = a.area_id
+		LEFT JOIN sys_area a6 ON a6.id = a.town_id
+	</sql>
+    
+	<select id="get" resultType="ShoppingMall">
+		SELECT 
+			<include refid="shoppingMallColumns"/>
+		FROM ts_shopping_mall a
+		<include refid="shoppingMallJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ShoppingMall">
+		SELECT 
+			<include refid="shoppingMallColumns"/>
+		FROM ts_shopping_mall a
+		<include refid="shoppingMallJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mallName != null and mallName != ''">
+				AND a.mall_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mallName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mallName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mallName},'%')</if>
+			</if>
+			<if test="province != null and province != ''">
+				AND a.province = #{province}
+			</if>
+			<if test="city != null and city != ''">
+				AND a.city = #{city}
+			</if>
+			<if test="area != null and area.id != null and area.id != ''">
+				AND a.area_id = #{area.id}
+			</if>
+			<if test="pageTop != null and pageTop != '' and pageTop != 0">
+				AND a.page_top = #{pageTop}
+			</if>
+			<if test="areaTop != null and areaTop != '' and areaTop != 0">
+				AND a.area_top = #{areaTop}
+			</if>
+			<if test="scrollTop != null and scrollTop != '' and scrollTop != 0">
+				AND a.scroll_top = #{scrollTop}
+			</if>	
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ShoppingMall">
+		SELECT 
+			<include refid="shoppingMallColumns"/>
+		FROM ts_shopping_mall a
+		<include refid="shoppingMallJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ts_shopping_mall(
+			id,
+			mall_name,
+			province,
+			city,
+			area_id,
+			town_id,
+			mall_url,
+			page_top,
+			area_top,
+			scroll_top,
+			shopping_area,
+			dynamic_flow,
+			static_flow,
+			office_area,
+			percent_1,
+			percent_2,
+			percent_3,
+			percent_4,
+			shop_num,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{mallName},
+			#{province},
+			#{city},
+			#{area.id},
+			#{town.id}, 
+			#{mallUrl},
+			#{pageTop},
+			#{areaTop},
+			#{scrollTop},
+			#{shoppingArea},
+			#{dynamicFlow},
+			#{staticFlow},
+			#{officeArea},
+			#{percent1},
+			#{percent2},
+			#{percent3},
+			#{percent4},
+			#{shopNum},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ts_shopping_mall SET 	
+			mall_name = #{mallName},
+			province = #{province},
+			city = #{city},
+			area_id = #{area.id}, 
+			town_id = #{town.id},
+			mall_url = #{mallUrl},
+			page_top = #{pageTop},
+			area_top = #{areaTop},
+			scroll_top = #{scrollTop},
+			shopping_area = #{shoppingArea},
+			dynamic_flow = #{dynamicFlow},
+			static_flow = #{staticFlow},
+			office_area = #{officeArea},
+			percent_1 = #{percent1},
+			percent_2 = #{percent2},
+			percent_3 = #{percent3},
+			percent_4 = #{percent4},
+			shop_num = #{shopNum},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ts_shopping_mall SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

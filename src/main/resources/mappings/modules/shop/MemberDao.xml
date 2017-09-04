@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.MemberDao">
+    
+	<sql id="memberColumns">
+		a.id AS "id",
+		a.open_id AS "openId",
+		a.nick_name AS "nickName",
+		a.mobile AS "mobile",
+		a.sale_flag AS "saleFlag",
+		a.publish_sale_flag AS "publishSaleFlag",
+		a.find_flag AS "findFlag",
+		a.publish_find_flag AS "publishFindFlag",
+		a.shop_id AS "shopId",
+		a.find_id AS "findId",
+		a.shop_date AS "shopDate",
+		a.find_date AS "findDate",
+		a.last_date AS "lastDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="memberJoins">
+	</sql>
+    
+	<select id="get" resultType="Member">
+		SELECT 
+			<include refid="memberColumns"/>
+		FROM ts_member a
+		<include refid="memberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="Member">
+		SELECT 
+			<include refid="memberColumns"/>
+		FROM ts_member a
+		<include refid="memberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+					<if test="dbName == 'oracle'">'%'||#{mobile}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{mobile}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{mobile},'%')</if>
+			</if>
+			<if test="openId != null and openId != ''">
+				AND a.open_id = #{openId}
+			</if>
+			<if test="saleFlag != null and saleFlag != ''">
+				AND a.sale_flag = #{saleFlag}
+			</if>
+			<if test="publishSaleFlag != null and publishSaleFlag != ''">
+				AND a.publish_sale_flag = #{publishSaleFlag}
+			</if>
+			<if test="findFlag != null and findFlag != ''">
+				AND a.find_flag = #{findFlag}
+			</if>
+			<if test="publishFindFlag != null and publishFindFlag != ''">
+				AND a.publish_find_flag = #{publishFindFlag}
+			</if>
+			<if test="publishAndSaleFlag != null and publishAndSaleFlag != ''">
+				AND (a.sale_flag != '0' OR a.publish_sale_flag != '0')
+			</if>
+			<if test="publishAndFindFlag != null and publishAndFindFlag != ''">
+				AND (a.find_flag != '0' OR a.publish_find_flag != '0')
+			</if>
+			<if test="saleType != null and saleType != ''">
+				AND (a.sale_flag = #{saleType} OR a.publish_sale_flag = #{saleType})
+			</if>
+			<if test="saleMember != null and saleMember != '' and saleMember == 1">
+				AND a.sale_flag != '0'
+			</if>
+			<if test="saleMember != null and saleMember != '' and saleMember == 2">
+				AND a.publish_sale_flag != '0'
+			</if>
+			<if test="findType != null and findType != ''">
+				AND (a.find_flag = #{findType} OR a.publish_find_flag = #{findType})
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Member">
+		SELECT 
+			<include refid="memberColumns"/>
+		FROM ts_member a
+		<include refid="memberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ts_member(
+			id,
+			open_id,
+			nick_name,
+			mobile,
+			sale_flag,
+			publish_sale_flag,
+			find_flag,
+			publish_find_flag,
+			shop_id,
+			find_id,
+			shop_date,
+			find_date,
+			last_date,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{openId},
+			#{nickName},
+			#{mobile},
+			#{saleFlag},
+			#{publishSaleFlag},
+			#{findFlag},
+			#{publishFindFlag},
+			#{shopId},
+			#{findId},
+			#{shopDate},
+			#{findDate},
+			#{lastDate},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ts_member SET 	
+			open_id = #{openId},
+			nick_name = #{nickName},
+			mobile = #{mobile},
+			sale_flag = #{saleFlag},
+			publish_sale_flag = #{publishSaleFlag},
+			find_flag = #{findFlag},
+			publish_find_flag = #{publishFindFlag},
+			shop_id = #{shopId},
+			find_id = #{findId},
+			shop_date = #{shopDate},
+			find_date = #{findDate},
+			last_date = #{lastDate},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE ts_member SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.wx.dao.WxTokenDao">
+    
+	<sql id="wxTokenColumns">
+		a.id AS "id",
+		a.token_type AS "tokenType",
+		a.token_value AS "tokenValue",
+		a.token_expire AS "tokenExpire",
+		a.create_time AS "createTime",
+		a.update_time AS "updateTime"
+	</sql>
+	
+	<sql id="wxTokenJoins">
+	</sql>
+    
+	<select id="get" resultType="WxToken">
+		SELECT 
+			<include refid="wxTokenColumns"/>
+		FROM ta_wx_token a
+		<include refid="wxTokenJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WxToken">
+		SELECT 
+			<include refid="wxTokenColumns"/>
+		FROM ta_wx_token a
+		<include refid="wxTokenJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WxToken">
+		SELECT 
+			<include refid="wxTokenColumns"/>
+		FROM ta_wx_token a
+		<include refid="wxTokenJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ta_wx_token(
+			id,
+			token_type,
+			token_value,
+			token_expire,
+			create_time,
+			update_time
+		) VALUES (
+			#{id},
+			#{tokenType},
+			#{tokenValue},
+			#{tokenExpire},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ta_wx_token SET 	
+			token_type = #{tokenType},
+			token_value = #{tokenValue},
+			token_expire = #{tokenExpire},
+			create_time = #{createTime},
+			update_time = #{updateTime}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ta_wx_token
+		WHERE id = #{id}
+	</update>
+	<select id="getAccessToken" resultType="WxToken">
+		select token_value from ta_wx_token where token_type='access_token' and token_expire>SYSDATE()
+	</select>
+	
+	<select id="getJsapiTicket" resultType="WxToken">
+		select token_value from ta_wx_token where token_type='jsapi_ticket' and token_expire>SYSDATE()
+	</select>
+</mapper>

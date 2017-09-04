@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huojuit.hishop.modules.shop.dao.HobbyDao">
+    
+	
+	
+	<select id="findShopList" resultType="Shop">
+		SELECT
+		b.id AS "id",
+		b.shop_name AS "shopName",
+		b.fee AS "fee",
+		b.use_area AS "useArea",
+		b.gold_flag AS "goldFlag",
+		b.update_date AS "updateDate",
+		b.image_1 AS "image1",
+		a14.name AS "area.name",
+		a15.name AS "town.name"
+		FROM
+			ts_hobby a,
+			ts_shop b
+			LEFT JOIN sys_area a14 ON a14.id = b.area_id
+			LEFT JOIN sys_area a15 ON a15.id = b.town_id
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		AND b.del_flag = #{DEL_FLAG_NORMAL}
+		AND b.show_flag = '1'
+		</where>
+		AND	a.shop_id = b.id
+		AND a.open_id = #{openId}
+		<choose>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<delete id="physicalDelete">
+		delete from ts_hobby WHERE open_id = #{openId} AND shop_id = #{shopId}
+	</delete>
+	
+</mapper>
